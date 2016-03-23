@@ -1,1 +1,1 @@
-Mini projekt concurrent add
+Miniprojekt concurrent add
