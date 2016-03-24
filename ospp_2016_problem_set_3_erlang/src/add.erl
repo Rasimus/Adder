@@ -2,44 +2,18 @@
 -module(add).
 -export([start/3, start/4, getCarryOuts/4, addDigits/4]).
 
-
-%%%%%%%%Borde ligga i utls
-
-%% @doc takes list of ints and returns int
-%% === Example ===
-%% utils:list_to_int(0,[1,2,3]).
-%% 123
--spec list_to_int(Acc::integer(), L::[integer()]) -> integer().
-
-list_to_int(Acc,[]) ->
-    Acc;
-list_to_int(Acc, [L]) ->
-    Acc*10 + L;
-list_to_int(Acc, [H|L]) ->
-    NewAcc = Acc*10 + H,
-    list_to_int(NewAcc, L).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
 %% @doc TODO: add documentation
 -spec start(A,B,Base) -> ok when 
       A::integer(),
       B::integer(), 
       Base::integer().
+
+
 %TODO: Break into lesser and more specific functions
 start(A,B, Base) ->
-    %L = getCarryOuts(A, B, Base, 0),
-    %Sum = utils:intersperse(" ", integer_to_list(A + B)),
     Eval = getCarryOuts(A,B,Base,0),
-    
     {S,L} = lists:unzip(Eval),
-    
-    
-    Sum = utils:intersperse(" ", integer_to_list(list_to_int(0,S))),
-
+    Sum = utils:intersperse(" ", lists:map(fun utils:digit_to_ascii/1, S)),
     Couts = utils:intersperse(" ", lists:map(fun utils:digit_to_ascii/1, L)),
     AStr = utils:intersperse(" ", integer_to_list(A)),
     BStr = utils:intersperse(" ", integer_to_list(B)),
