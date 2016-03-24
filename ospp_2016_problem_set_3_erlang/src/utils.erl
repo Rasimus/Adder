@@ -5,7 +5,7 @@
 
 -module(utils). 
 
--export([seqs/1, filter/2, split/2]).
+-export([seqs/1, filter/2, split/2, split/3]).
 
 %% To use EUnit we must include this.
 -include_lib("eunit/include/eunit.hrl").
@@ -118,7 +118,20 @@ lqr(L, N) ->
 
 
 split(L, N) ->
-    tbi.
+    Len = length(L),
+    Q = Len div N,
+    R = Len rem N,
+    split(L, Q, R).
+
+split([],_,_) ->
+    [];
+split(L,Q,0) ->
+    {First, Rest} = lists:split(Q, L),
+    [First | split(Rest,Q,0)];    
+split(L,Q,R) ->
+    {First, Rest} = lists:split(Q+1, L),
+    [First | split(Rest,Q,R-1)].
+
 
 %% @doc Converts a digit to it's ascii representation.
 %%
