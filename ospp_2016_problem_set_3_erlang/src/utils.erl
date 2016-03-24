@@ -13,6 +13,10 @@
 -compile(export_all). 
 
 
+
+
+
+
 %% @doc Generates a list of lists of increasing sequences of integers
 %% starting with the empty list and ending with [1,2, ..., N].
 %% === Example ===
@@ -143,6 +147,8 @@ intersperse(_, [H]) ->
     [H];
 intersperse(X, [H|T]) ->
     [H | [X | intersperse(X, T)]].
+
+
 %% @doc Replaces every occurrence of an element X in a list with a given element Y.
 %%
 %% === Example ===
