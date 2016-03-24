@@ -116,14 +116,86 @@ lqr(L, N) ->
 split(L, N) ->
     tbi.
 
+%% @doc Converts a digit to it's ascii representation.
+%%
+%% === Example ===
+%% digit_to_ascii(0) = $0
+%% digit_to_ascii(9) = $9
+-spec digit_to_ascii(Digit) -> Ascii when
+      Digit :: integer(),
+      Ascii :: integer().
 
+digit_to_ascii(X) when (X >= 0) and (X =< 10) ->
+    $0 + X.
+
+%% @doc Intersperses a list with a given element
+%%
+%% === Example ===
+%% L = ["l", "l", "l"]
+%% intersperse("o", L) = ["l", "o", "l", "o", "l"]
+-spec intersperse(Elem, List) -> New_list when
+      Elem :: _,
+      List :: [_],
+      New_list :: [_].
+intersperse(_, []) ->
+    [];
+intersperse(_, [H]) ->
+    [H];
+intersperse(X, [H|T]) ->
+    [H | [X | intersperse(X, T)]].
+%% @doc Replaces every occurrence of an element X in a list with a given element Y.
+%%
+%% === Example ===
+%% L = ["h", "e", "h", "e"]
+%% replace("e", "a", L) = ["h", "a", "h", "a"]
+-spec replace(Elem, Elem2, List) -> New_list when
+      Elem :: _,
+      Elem2 :: _,
+      List :: [_],
+      New_list :: [_].
+
+replace(_, _, []) ->
+    [];
+replace(X, Y, [X|T]) ->
+    [Y | replace(X, Y, T)];
+replace(X, Y, [H|T]) ->
+    [H | replace(X, Y, T)].
+
+%% @doc TODO
+repeat(Char, N) ->  
+    [Char || _ <- lists:seq(1,N)].
+
+%% @doc Pads a list to the right or left N times with a given element 
+%% 
+%% === Example ===
+%% L = [1, 1, 1]
+%% padList(left, 0, 2, L) = L = [0, 0, 1, 1, 1]
+%% padList(right, 0, 3, L) = L = [1, 1, 1, 0, ,0 ,0]
+-spec pad_list(Side, Elem, N, List) -> New_list when
+      Side :: atom(),
+      Elem :: _,
+      N :: integer(),
+      List :: [_],
+      New_list :: [_].
+
+pad_list(Side, X, N, List) ->
+    case Side of
+	left -> 
+	    repeat(X, N) ++ List;
+	right ->
+	    List ++ repeat(X, N)
+    end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                          %%
 %%			   EUnit Test Cases                                 %%
 %%                                                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+pad_list_right_test() ->
+    ?_assertEqual("234", pad_list(right, 5, 2, "23455")).
+pad_list_left_test() ->
+    ?_assertEqual("1234", pad_list(left, 1, 1, "234")).
+    
 seqs_length_test_() ->
     %% The list [[], [1], [1,2], ..., [1,2, ..., N]] will allways have
     %% length N+1.
