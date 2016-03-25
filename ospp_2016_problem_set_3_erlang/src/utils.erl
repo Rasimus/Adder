@@ -214,6 +214,10 @@ pad_list_right_test() ->
     ?_assertEqual("234", pad_list(right, 5, 2, "23455")).
 pad_list_left_test() ->
     ?_assertEqual("1234", pad_list(left, 1, 1, "234")).
+pad_list_empty_test() ->
+    Test1 = ?_assertEqual("", pad_list(left, "", 1, "")),
+    Test2 = ?_assertEqual("", pad_list(left, "1", 1, "1")),
+    [Test1, Test2].
     
 seqs_length_test_() ->
     %% The list [[], [1], [1,2], ..., [1,2, ..., N]] will allways have
