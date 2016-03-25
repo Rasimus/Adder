@@ -217,6 +217,10 @@ pad_list(Side, X, N, List) ->
 %%			   EUnit Test Cases                                 %%
 %%                                                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+digit_to_ascii_test() ->
+    L = [$0, $1, $2, $3, $4, $5, $6, $7, $8, $9],
+    ?assertEqual(L, [digit_to_ascii(N) || N <-lists:seq(0, 9)]).
+
 intersperse_test() ->
     L = ["l", "l", "l"],
     ? assertEqual(intersperse("o", L), ["l", "o", "l", "o", "l"]).
