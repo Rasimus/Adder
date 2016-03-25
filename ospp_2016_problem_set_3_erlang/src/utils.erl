@@ -150,6 +150,8 @@ digit_to_ascii(X) when (X >= 0) and (X =< 10) ->
 %% === Example ===
 %% L = ["l", "l", "l"]
 %% intersperse("o", L) = ["l", "o", "l", "o", "l"]
+%% intersperse("a", ["h"] = ["h"]
+%% intersperse("a", []) = []
 -spec intersperse(Elem, List) -> New_list when
       Elem :: _,
       List :: [_],
@@ -215,22 +217,32 @@ pad_list(Side, X, N, List) ->
 %%			   EUnit Test Cases                                 %%
 %%                                                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+intersperse_test() ->
+    L = ["l", "l", "l"],
+    ? assertEqual(intersperse("o", L), ["l", "o", "l", "o", "l"]).
+intersperse_single_test() ->
+    ?assertEqual(intersperse("a", ["h"]), ["h"]).
+intersperse_empty_test() ->
+    ?assertEqual(intersperse("a", []), []).
+
 repeat_test() ->
     Test1 = ? assertEqual(["A","A","A"], repeat("A",3)),
     Test2 = ? assertEqual(["B"], repeat("B", 1)),
     [Test1, Test2].
+
 repeat_empty_test() ->
     ? assertEqual([], repeat("A", 0)).
+
 pad_list_right_test() ->
     ?_assertEqual("234", pad_list(right, 5, 2, "23455")).
+
 pad_list_left_test() ->
     ?_assertEqual("1234", pad_list(left, 1, 1, "234")).
+
 pad_list_empty_test() ->
     Test1 = ?_assertEqual("", pad_list(left, "", 1, "")),
     Test2 = ?_assertEqual("", pad_list(left, "1", 1, "1")),
     [Test1, Test2].
-
-
     
 seqs_length_test_() ->
     %% The list [[], [1], [1,2], ..., [1,2, ..., N]] will allways have
