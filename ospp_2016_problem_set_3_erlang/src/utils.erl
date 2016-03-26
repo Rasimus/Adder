@@ -150,6 +150,8 @@ digit_to_ascii(X) when (X >= 0) and (X =< 10) ->
 %% === Example ===
 %% L = ["l", "l", "l"]
 %% intersperse("o", L) = ["l", "o", "l", "o", "l"]
+%% intersperse("a", ["h"] = ["h"]
+%% intersperse("a", []) = []
 -spec intersperse(Elem, List) -> New_list when
       Elem :: _,
       List :: [_],
@@ -180,9 +182,14 @@ replace(X, Y, [X|T]) ->
 replace(X, Y, [H|T]) ->
     [H | replace(X, Y, T)].
 
-%% @doc TODO
-repeat(Char, N) ->  
-    [Char || _ <- lists:seq(1,N)].
+%% @doc Creates a list containing N repetitions of a given element.
+%% 
+%% === Example ===
+%% repeat("A", 3) = ["A","A","A"]
+%% repeat("A", 0) = []
+%% repeat("B", 1) = ["B"]
+repeat(Elem, N) ->  
+    [Elem || _ <- lists:seq(1,N)].
 
 %% @doc Pads a list to the right or left N times with a given element 
 %% 
@@ -210,10 +217,36 @@ pad_list(Side, X, N, List) ->
 %%			   EUnit Test Cases                                 %%
 %%                                                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+digit_to_ascii_test() ->
+    L = [$0, $1, $2, $3, $4, $5, $6, $7, $8, $9],
+    ?assertEqual(L, [digit_to_ascii(N) || N <-lists:seq(0, 9)]).
+
+intersperse_test() ->
+    L = ["l", "l", "l"],
+    ? assertEqual(intersperse("o", L), ["l", "o", "l", "o", "l"]).
+intersperse_single_test() ->
+    ?assertEqual(intersperse("a", ["h"]), ["h"]).
+intersperse_empty_test() ->
+    ?assertEqual(intersperse("a", []), []).
+
+repeat_test() ->
+    Test1 = ? assertEqual(["A","A","A"], repeat("A",3)),
+    Test2 = ? assertEqual(["B"], repeat("B", 1)),
+    [Test1, Test2].
+
+repeat_empty_test() ->
+    ? assertEqual([], repeat("A", 0)).
+
 pad_list_right_test() ->
     ?_assertEqual("234", pad_list(right, 5, 2, "23455")).
+
 pad_list_left_test() ->
     ?_assertEqual("1234", pad_list(left, 1, 1, "234")).
+
+pad_list_empty_test() ->
+    Test1 = ?_assertEqual("", pad_list(left, "", 1, "")),
+    Test2 = ?_assertEqual("", pad_list(left, "1", 1, "1")),
+    [Test1, Test2].
     
 seqs_length_test_() ->
     %% The list [[], [1], [1,2], ..., [1,2, ..., N]] will allways have
