@@ -41,36 +41,35 @@ start(A,B,Base, Options) ->
     ASubs = utils:split(integer_to_list(A), Options),
     BSubs = utils:split(integer_to_list(B), Options),
     Master = self(),
-    LastProcess = distribute(ASubs, BSubs, Base, 1, Master, Master),
+    LastProcess = distribute(ASubs, BSubs, Base, Master, Master),
     LastProcess ! {carry, 0},
     listener([]).
 
 
 %%Starts all process's and Returns last process so we can send carry=0 to it.
-distribute([A], [B], Base, Index, Next,Master) ->
-    spawn( fun() -> otherProcess(A, B, Base, Index, Next, Master) end);
+distribute([A], [B], Base, Next,Master) ->
+    spawn( fun() -> otherProcess(A, B, Base,Next, Master) end);
+
+distribute([A|Ax], [B|Bx], Base, Next,Master) ->
+    SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Next, Master) end),
+    distribute(Ax,Bx,Base,SpawnedProcess,Master).
 
 
-distribute([A|Ax], [B|Bx], Base, Index, Next,Master) ->
-    SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Index, Next, Master) end),
-    distribute(Ax,Bx,Base,Index+1,SpawnedProcess,Master).
-
-
-otherProcess(A,B,Base, Index, Next, Master) ->
+otherProcess(A,B,Base, Next, Master) ->
     receive
 	{carry, CarryIn} ->
 	    {CarryOut, Sum} = addThis(list_to_integer(A),list_to_integer(B),Base,CarryIn),
-	    Master ! {sum, Sum, Index},
+	    Master ! {sum, Sum},
 	    Next ! {carry, CarryOut}
     end.
-    
+
+%%Gathers Sums    
 listener(Sums) ->
     receive
-	{sum, Sum, Index} ->
-	    listener([{Index,Sum}|Sums]);
+	{sum, Sum} ->
+	    listener([Sum|Sums]);
 	{carry, CarryOut} ->
-	    {_,Sum} = lists:unzip([{0, CarryOut} | lists:keysort(1,Sums)]),
-	    lists:flatten(Sum)
+	    lists:flatten([CarryOut|Sums])
     end.
 
 
