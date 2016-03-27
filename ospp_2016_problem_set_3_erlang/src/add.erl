@@ -38,6 +38,7 @@ start(A,B, Base) ->
 
 %TODO: Assumes A, B is same length: (prepend 0's to shorter int to solve this)
 
+
 start(A,B,Base,[Splits , {Min,Max}]) ->
     ASubs = utils:split(integer_to_list(A), Splits),
     BSubs = utils:split(integer_to_list(B), Splits),
@@ -46,23 +47,31 @@ start(A,B,Base,[Splits , {Min,Max}]) ->
     LastProcess ! {carry, 0},
     listener([]);
 
-start(A,B,Base, Splits) ->
+start(A,B,Base, [Splits, spec]) ->
+    start(A,B,Base, [Splits, {0, 0}, spec]);
+start(A,B,Base, [Splits, {Min, Max}, spec]) ->
     ASubs = utils:split(integer_to_list(A), Splits),
     BSubs = utils:split(integer_to_list(B), Splits),
     Master = self(),
-    LastProcess = distribute(ASubs, BSubs, Base, Master, Master,0,0),
+    LastProcess = distribute(ASubs, BSubs, Base, Master, Master,Min,Max,spec),
     LastProcess ! {carry, 0},
-    listener([]).
+    listener([]);
+start(A,B,Base, Splits) ->
+    start(A,B,Base,[Splits, {0, 0}, spec]).
 
 
 %%Starts all process's and Returns last process so we can send carry=0 to it.
 distribute([A], [B], Base, Next,Master,Min,Max) ->
     spawn( fun() -> otherProcess(A, B, Base,Next, Master,Min,Max) end);
-
 distribute([A|Ax], [B|Bx], Base, Next,Master,Min,Max) ->
     SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Next, Master,Min,Max) end),
     distribute(Ax,Bx,Base,SpawnedProcess,Master,Min,Max).
 
+distribute([A], [B], Base, Next,Master,Min,Max,spec) ->
+    spawn( fun() -> otherProcess(A, B, Base,Next, Master,Min,Max,spec) end);
+distribute([A|Ax], [B|Bx], Base, Next,Master,Min,Max, spec) ->
+    SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Next, Master,Min,Max,spec) end),
+    distribute(Ax,Bx,Base,SpawnedProcess,Master,Min,Max,spec).
 
 otherProcess(A,B,Base, Next, Master,Min,Max) ->
     receive
@@ -71,7 +80,43 @@ otherProcess(A,B,Base, Next, Master,Min,Max) ->
 	    Master ! {sum, Sum},
 	    Next ! {carry, CarryOut}
     end.
+%%Speculative mode
+otherProcess(A, B, Base, Next, Master,Min, Max, spec) ->
+    Parent = self(),
+    CarryChild = spawn(fun() -> speculativeProcess(A, B, Base, 1, Min, Max, Parent) end),
+    NoCarryChild = spawn(fun() -> speculativeProcess(A, B, Base, 0, Min, Max, Parent) end),
+    {CarryOut, Sum} = otherProcessLoop(NoCarryChild, CarryChild, undecided, undecided, undecided),
+    Master ! {sum, Sum},
+    Next ! {carry, CarryOut}.
 
+%%Stateful loop for figuring out which speculative result to use
+otherProcessLoop(NoCarryChild, CarryChild, CarryIn, CarryResult, NoCarryResult) ->
+    receive
+    	{carry, 1} when CarryResult =:= undecided ->
+    	    exit(NoCarryChild, kill), 		    
+    	    R = otherProcessLoop(NoCarryChild, CarryChild, 1, CarryResult, NoCarryResult);
+    	{carry, 1} ->
+    	    exit(NoCarryChild, kill),
+    	    R = CarryResult;
+    	{carry, 0} when NoCarryResult =:= undecided ->
+    	    exit(CarryChild, kill),
+    	    R = otherProcessLoop(NoCarryChild, CarryChild, 0, CarryResult, NoCarryResult);
+    	{carry, 0} ->
+    	    exit(CarryChild, kill),
+    	    R = NoCarryResult;
+    	{spec, CarryIn, Result} ->
+    	    R = Result;
+    	{spec, 0, Result} ->
+    	    R = otherProcessLoop(NoCarryChild, CarryChild, CarryIn, CarryResult, Result);
+    	{spec, 1, Result} ->
+    	    R = otherProcessLoop(NoCarryChild, CarryChild, CarryIn, Result, NoCarryResult)
+    end,
+    R.
+
+speculativeProcess(A, B, Base, CarryIn, Min, Max, Parent) ->
+    Result = addThis(list_to_integer(A),list_to_integer(B),Base,CarryIn,Min,Max),
+    Parent ! {spec, CarryIn, Result}.
+    
 %%Gathers Sums    
 listener(Sums) ->
     receive
