@@ -1,6 +1,6 @@
 %% @doc Erlang mini project.
 -module(add).
--export([start/3, start/4]).
+-export([start/3, start/4, addThis/6, getCarryOuts/6]).
 
 %% @doc TODO: add documentation
 -spec start(A,B,Base) -> ok when 
@@ -92,6 +92,9 @@ listener(Sums) ->
       Cout::integer(),
       Min::integer(),
       Max::integer().
+
+getCarryOuts(0, 0, _Base, 0, _, _) ->
+    [{0, 0}];
  
 getCarryOuts(A, B, Base, Cin,Min,Max) ->
     {Q,W,E} = now(),
