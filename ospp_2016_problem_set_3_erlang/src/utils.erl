@@ -357,4 +357,3 @@ split_stat_test_() ->
     %% depends on the length of L.
     
     [Assert(L,N) ||  L <- seqs(33), N <- lists:seq(1,length(L)+5)].
-    
