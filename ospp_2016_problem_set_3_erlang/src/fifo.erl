@@ -30,7 +30,7 @@ size({fifo, In, Out}) ->
 %% In.
 
 push({fifo, In, Out}, X) -> 
-    tbi.
+    {fifo, [X|In], Out}.
 
 %% @doc TODO Add a description
 %% @throws 'empty fifo'
@@ -44,14 +44,14 @@ pop({fifo, [], []}) ->
 %% To make pop fast we want to pop of the head of the Out list.
     
 pop({fifo, In, [H|T]}) -> 
-    tbi;
+    {H, {fifo, In, T}};
 
 %% When Out is empty, we must take a performance penalty. Use the
 %% reverse of In s the new Out and an empty lists as the new In, then
 %% pop as usual.
 
 pop({fifo, In, []}) ->
-    tbi.
+    pop({fifo, [], lists:reverse(In)}).
 
 
 %% @doc TODO Add a description
