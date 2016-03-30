@@ -69,11 +69,7 @@ print(A,B,{S,L}) ->
 start(A,B,Base,[Splits , {Min,Max}]) ->
 
     %%Make A and B the same length.
-    AList = integer_to_list(A),
-    BList = integer_to_list(B),
-    Longest = max(length(AList),length(BList)),
-    Az = utils:pad_list(left, $0, Longest - length(AList), AList),
-    Bz = utils:pad_list(left, $0, Longest - length(BList), BList),
+    {Az, Bz} = utils:make_equal_length(integer_to_list(A), integer_to_list(B), $0),
 
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),
@@ -88,11 +84,7 @@ start(A,B,Base, [Splits, spec]) ->
     start(A,B,Base, [Splits, {0, 0}, spec]);
 start(A,B,Base, [Splits, {Min, Max}, spec]) ->
     %%Make A and B the same length.
-    AList = integer_to_list(A),
-    BList = integer_to_list(B),
-    Longest = max(length(AList),length(BList)),
-    Az = utils:pad_list(left, '0', Longest - length(AList), AList),
-    Bz = utils:pad_list(left, '0', Longest - length(BList), BList),
+    {Az, Bz} = utils:make_equal_length(integer_to_list(A), integer_to_list(B), $0),
 
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),

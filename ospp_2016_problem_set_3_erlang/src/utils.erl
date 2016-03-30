@@ -223,8 +223,8 @@ repeat(Elem, N) ->
       Side :: atom(),
       Elem :: _,
       N :: integer(),
-      List :: [_],
-      New_list :: [_].
+      List :: list(),
+      New_list :: list().
 
 pad_list(Side, X, N, List) ->
     case Side of
@@ -233,6 +233,27 @@ pad_list(Side, X, N, List) ->
 	right ->
 	    List ++ repeat(X, N)
     end.
+
+%% @docs Makes two lists the same length by prepending an element to the shortest list sufficiently many times.
+%% === Example ===
+%% <div class="example">```
+%% 1> A = [1, 1, 1].
+%% 2> B = [1, 1, 1, 1, 1].
+%% 3> make_equal_length(A, B, 0).
+%% {[0, 0, 1, 1, 1], [1, 1, 1, 1, 1]}
+-spec make_equal_length(A, B, Elem) -> {New_A, New_B} when
+      A :: list(),
+      B :: list(),
+      Elem :: _,
+      New_A :: list(),
+      New_B :: list().
+
+make_equal_length(A, B, Elem) ->
+
+    Longest = max(length(A),length(B)),
+    New_A = utils:pad_list(left, Elem, Longest - length(A), A),
+    New_B = utils:pad_list(left, Elem, Longest - length(B), B),
+    {New_A, New_B}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                          %%
