@@ -191,8 +191,10 @@ simpsons(pets) ->
 %% </div>
 -spec char_to_upper(char()) -> char().
 
-char_to_upper(Char) when true->
-    string:to_upper(Char).
+char_to_upper(Char) when (Char >= $a) and (Char =< $z) ->
+    Char - ($a - $A);
+char_to_upper(Char) ->
+    Char.
 
 %% @doc Convert a character to lower case.
 %% === Example ===
@@ -204,8 +206,11 @@ char_to_upper(Char) when true->
 %% </div>
 -spec char_to_lower(char()) -> char().
 
-char_to_lower(Char) when true ->
-    string:to_lower(Char).
+char_to_lower(Char) when (Char >= $A) and (Char =< $Z) ->
+    Char + ($a - $A);
+char_to_lower(Char) ->
+    Char.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Map  %%%%%%%%%%
@@ -222,8 +227,7 @@ char_to_lower(Char) when true ->
 -spec str_to_upper(string()) -> string().
 
 str_to_upper(String) ->
-    string:to_upper(String).
-
+    lists:map(fun char_to_upper/1, String).
 
 %% @doc Convert a string to lower case. 
 %% === Example ===
@@ -234,7 +238,7 @@ str_to_upper(String) ->
 -spec str_to_lower(string()) -> string().
 
 str_to_lower(String) ->
-    string:to_lower(String).
+    lists:map(fun char_to_lower/1, String).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Fold %%%%%%%%%%
