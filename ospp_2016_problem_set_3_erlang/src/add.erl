@@ -68,12 +68,12 @@ print(A,B,{S,L}) ->
 
 start(A,B,Base,[Splits , {Min,Max}]) ->
 
-    %%Makes them same length so shit works
+    %%Make A and B the same length.
     AList = integer_to_list(A),
     BList = integer_to_list(B),
     Longest = max(length(AList),length(BList)),
-    Az = utils:pad_list(left, Longest - length(AList), "0", AList),
-    Bz = utils:pad_list(left, Longest - length(BList), "0", BList),
+    Az = utils:pad_list(left, $0, Longest - length(AList), AList),
+    Bz = utils:pad_list(left, $0, Longest - length(BList), BList),
 
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),
@@ -87,12 +87,12 @@ start(A,B,Base,[Splits , {Min,Max}]) ->
 start(A,B,Base, [Splits, spec]) ->
     start(A,B,Base, [Splits, {0, 0}, spec]);
 start(A,B,Base, [Splits, {Min, Max}, spec]) ->
-    %%Makes A and B the same length.
+    %%Make A and B the same length.
     AList = integer_to_list(A),
     BList = integer_to_list(B),
     Longest = max(length(AList),length(BList)),
-    Az = utils:pad_list(left, Longest - length(AList), "0", AList),
-    Bz = utils:pad_list(left, Longest - length(BList), "0", BList),
+    Az = utils:pad_list(left, '0', Longest - length(AList), AList),
+    Bz = utils:pad_list(left, '0', Longest - length(BList), BList),
 
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),
@@ -104,7 +104,7 @@ start(A,B,Base, [Splits, {Min, Max}, spec]) ->
     print(A,B,{lists:flatten(Sums), lists:flatten(Carries)});    
 
 start(A,B,Base, Splits) ->
-    start(A,B,Base,[Splits, {0, 0}, spec]).
+    start(A,B,Base,[Splits, {0, 0}]).
 
 
 %%Starts all process's and Returns last process so we can send carry=0 to it.
