@@ -5,7 +5,7 @@
 
 -module(utils). 
 
--export([seqs/1, filter/2, split/2, split/3, digit_to_ascii/1, intersperse/2, replace/3, repeat/2, pad_list/4]).
+-export([seqs/1, filter/2, split/2, split/3, digit_to_ascii/1, intersperse/2, replace/3, repeat/2, pad_list/4, make_equal_length/3]).
 
 %% To use EUnit we must include this.
 -include_lib("eunit/include/eunit.hrl").
@@ -75,8 +75,6 @@ filter_collect(N,R) ->
     receive
 	{I, L} -> filter_collect(N-1, [{I,L}|R])
     end.
-
-
 
 lqr(L, N) ->
     Len = length(L),
@@ -273,24 +271,26 @@ intersperse_empty_test() ->
     ?assertEqual(intersperse("a", []), []).
 
 repeat_test() ->
-    Test1 = ? assertEqual(["A","A","A"], repeat("A",3)),
-    Test2 = ? assertEqual(["B"], repeat("B", 1)),
+    Test1 = ?assertEqual(["A","A","A"], repeat("A",3)),
+    Test2 = ?assertEqual(["B"], repeat("B", 1)),
     [Test1, Test2].
 
 repeat_empty_test() ->
-    ? assertEqual([], repeat("A", 0)).
+    ?assertEqual([], repeat("A", 0)).
 
 pad_list_right_test() ->
-    ?_assertEqual("234", pad_list(right, 5, 2, "23455")).
+    ?assertEqual(pad_list(right, $5, 2, "234"), "23455").
 
 pad_list_left_test() ->
-    ?_assertEqual("1234", pad_list(left, 1, 1, "234")).
+    ?assertEqual("1234", pad_list(left, $1, 1, "234")).
 
-pad_list_empty_test() ->
-    Test1 = ?_assertEqual("", pad_list(left, "", 1, "")),
-    Test2 = ?_assertEqual("", pad_list(left, "1", 1, "1")),
+make_equal_length_test() ->
+    Test1 = ?assertEqual({"00", "11"}, make_equal_length("", "11", $0)),
+    Test2 = ?assertEqual({"11", "00"}, make_equal_length("11", "", $0)),
     [Test1, Test2].
-    
+make_equal_length_same_test() ->
+    ?assertEqual({"00", "11"}, make_equal_length("00", "11", $0)).
+
 seqs_length_test_() ->
     %% The list [[], [1], [1,2], ..., [1,2, ..., N]] will allways have
     %% length N+1.
