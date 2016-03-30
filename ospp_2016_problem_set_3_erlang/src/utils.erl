@@ -5,14 +5,12 @@
 
 -module(utils). 
 
--export([seqs/1, filter/2, split/2, split/3]).
+-export([seqs/1, filter/2, split/2, split/3, digit_to_ascii/1, intersperse/2, replace/3, repeat/2, pad_list/4]).
 
 %% To use EUnit we must include this.
 -include_lib("eunit/include/eunit.hrl").
 
 -compile(export_all). 
-
-
 
 
 
@@ -136,8 +134,13 @@ split(L,Q,R) ->
 %% @doc Converts a digit to it's ascii representation.
 %%
 %% === Example ===
-%% digit_to_ascii(0) = $0
-%% digit_to_ascii(9) = $9
+%%
+%% <div class="example">```
+%% 1> digit_to_ascii(0).
+%% $0
+%% 2> digit_to_ascii(9).
+%% $9'''
+%% </div>
 -spec digit_to_ascii(Digit) -> Ascii when
       Digit :: integer(),
       Ascii :: integer().
@@ -148,10 +151,16 @@ digit_to_ascii(X) when (X >= 0) and (X =< 10) ->
 %% @doc Intersperses a list with a given element
 %%
 %% === Example ===
-%% L = ["l", "l", "l"]
-%% intersperse("o", L) = ["l", "o", "l", "o", "l"]
-%% intersperse("a", ["h"] = ["h"]
-%% intersperse("a", []) = []
+%%
+%% <div class="example">```
+%% 1> L = ["l", "l", "l"]
+%% 2> intersperse("o", L).
+%% ["l", "o", "l", "o", "l"]
+%% 3> intersperse("a", ["h"].
+%% ["h"]
+%% 4> intersperse("a", []).
+%% []'''
+%% </div>
 -spec intersperse(Elem, List) -> New_list when
       Elem :: _,
       List :: [_],
@@ -167,8 +176,12 @@ intersperse(X, [H|T]) ->
 %% @doc Replaces every occurrence of an element X in a list with a given element Y.
 %%
 %% === Example ===
-%% L = ["h", "e", "h", "e"]
-%% replace("e", "a", L) = ["h", "a", "h", "a"]
+%%
+%% <div class="example">```
+%% 1> L = ["h", "e", "h", "e"]
+%% 2> replace("e", "a", L).
+%% ["h", "a", "h", "a"]'''
+%% </div>
 -spec replace(Elem, Elem2, List) -> New_list when
       Elem :: _,
       Elem2 :: _,
@@ -185,18 +198,27 @@ replace(X, Y, [H|T]) ->
 %% @doc Creates a list containing N repetitions of a given element.
 %% 
 %% === Example ===
-%% repeat("A", 3) = ["A","A","A"]
-%% repeat("A", 0) = []
-%% repeat("B", 1) = ["B"]
+%% <div class="example">```
+%% 1> repeat("A", 3).
+%% ["A","A","A"]
+%% 2> repeat("A", 0).
+%% []
+%% 3> repeat("B", 1).
+%% ["B"]'''
+%% </div>
 repeat(Elem, N) ->  
     [Elem || _ <- lists:seq(1,N)].
 
 %% @doc Pads a list to the right or left N times with a given element 
 %% 
 %% === Example ===
-%% L = [1, 1, 1]
-%% padList(left, 0, 2, L) = L = [0, 0, 1, 1, 1]
-%% padList(right, 0, 3, L) = L = [1, 1, 1, 0, ,0 ,0]
+%% <div class="example">```
+%% 1> L = [1, 1, 1].
+%% 2> padList(left, 0, 2, L).
+%% [0, 0, 1, 1, 1]
+%% 3> padList(right, 0, 3, L).
+%% [1, 1, 1, 0, ,0 ,0]'''
+%% </div>
 -spec pad_list(Side, Elem, N, List) -> New_list when
       Side :: atom(),
       Elem :: _,
@@ -214,7 +236,7 @@ pad_list(Side, X, N, List) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                                          %%
-%%			   EUnit Test Cases                                 %%
+%%			   Eunit Test Cases                                 %%
 %%                                                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 digit_to_ascii_test() ->

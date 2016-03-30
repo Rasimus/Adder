@@ -1,55 +1,70 @@
 %% @doc Erlang mini project.
 -module(add).
--export([start/3, start/4, addThis/6, getCarryOuts/6, print/3]).
+-export([start/3, start/4]).
 
-%% @doc TODO: add documentation
+%% @doc Adds positive integers A and B in a given base and prints a textual representation of the addition.
+%% <div class="example">```
+%% === Example ===
+%% 1> start(50, 70, 10).
+%%   1 0 0
+%%   -----
+%%     5 0 
+%%     7 0
+%%   -----
+%%   1 2 0'''
+%% </div>
 -spec start(A,B,Base) -> ok when 
       A::integer(),
       B::integer(), 
       Base::integer().
 
 
-%TODO: Break into lesser and more specific functions
 start(A,B, Base) ->
     Eval = getCarryOuts(A,B,Base,0,0,0),
     {S,L} = lists:unzip(Eval),
     print(A,B,{S,L}).
 
-
-% A, B, Sums, Carries
 print(A,B,{S,L}) ->
     Sum = utils:intersperse(" ", lists:map(fun utils:digit_to_ascii/1, S)),
     Couts = utils:intersperse(" ", lists:map(fun utils:digit_to_ascii/1, L)),
     AStr = utils:intersperse(" ", integer_to_list(A)),
     BStr = utils:intersperse(" ", integer_to_list(B)),
     Width = length(Sum),
-    [Str1, Str2, Str3, Str4] = lists:map(fun(X) -> utils:pad_list(left, " ", Width - length(X), X) end, [Couts, AStr, BStr, Sum]),
-    io:format(Str1 ++ "~n"
+    [CoutsFmt, AStrFmt, BStrFmt, SumFmt] = lists:map(fun(X) -> utils:pad_list(left, " ", Width - length(X), X) end, [Couts, AStr, BStr, Sum]),
+    io:format(CoutsFmt ++ "~n"
 	      ++ utils:repeat("-", Width) ++ "~n"
-	      ++ Str2 ++ "~n" 
-	      ++ Str3 ++ "~n" 
+	      ++ AStrFmt ++ "~n" 
+	      ++ BStrFmt ++ "~n" 
 	      ++ utils:repeat("-", Width) ++ "~n"
-	      ++ Str4 ++ "~n"),
+	      ++ SumFmt ++ "~n"),
     ok.    
     
 
-%% @doc TODO: add documentation
+%% @doc Same as {@link start/3} but with additional options available.
+%% Options:
+%%
+%%   Splits - 
+%%    Splits the calculation into multiple processes where 'Splits' is the number of processes.
+%%
+%%   {Min, Max} - 
+%%    Used for debugging. Randomly sleeps the processes of the program for a minimum of 'Min' ms and a maximum of 'Max' ms.
+%%
+%%   spec - Turns on speculative mode when already using option Splits.
+%%
+%%  === Examples ===
+%%  <div class="example">```
+%%  1> start(A, B, Base, [Splits]).
+%%  2> start(A, B, Base, [Splits, {Min, Max}]).
+%%  3> start(A, B, Base, [Splits, {Min, Max}, spec]).
+%%  4> start(A, B, Base, [Splits, spec]).'''
+%% </div>
+
 -spec start(A,B,Base, Options) -> ok when 
       A::integer(),
       B::integer(), 
       Base::integer(),
       Option::integer() | atom() | tuple(),
-      Options::[Option].
-
-
-%TODO: Assumes A, B is same length: (prepend 0's to shorter int to solve this)
-
-%
-prependNZeroes(0, Str) ->
-    Str;
-prependNZeroes(N, Str) ->
-    prependNZeroes(N-1, lists:append("0", Str)).
-    
+      Options::[Option].    
 
 start(A,B,Base,[Splits , {Min,Max}]) ->
 
@@ -57,10 +72,9 @@ start(A,B,Base,[Splits , {Min,Max}]) ->
     AList = integer_to_list(A),
     BList = integer_to_list(B),
     Longest = max(length(AList),length(BList)),
-    Az = prependNZeroes(Longest - length(AList), AList),
-    Bz = prependNZeroes(Longest - length(BList), BList),
+    Az = utils:pad_list(left, Longest - length(AList), "0", AList),
+    Bz = utils:pad_list(left, Longest - length(BList), "0", BList),
 
-    %%
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),
     Master = self(),
@@ -70,19 +84,15 @@ start(A,B,Base,[Splits , {Min,Max}]) ->
     {Sums, Carries} = lists:unzip(R),
     print(A,B,{lists:flatten(Sums), lists:flatten(Carries)});
 
-
-
 start(A,B,Base, [Splits, spec]) ->
     start(A,B,Base, [Splits, {0, 0}, spec]);
 start(A,B,Base, [Splits, {Min, Max}, spec]) ->
-    %%Makes them same length so shit works
+    %%Makes A and B the same length.
     AList = integer_to_list(A),
     BList = integer_to_list(B),
     Longest = max(length(AList),length(BList)),
-    Az = prependNZeroes(Longest - length(AList), AList),
-    Bz = prependNZeroes(Longest - length(BList), BList),
-
-
+    Az = utils:pad_list(left, Longest - length(AList), "0", AList),
+    Bz = utils:pad_list(left, Longest - length(BList), "0", BList),
 
     ASubs = utils:split(Az, Splits),
     BSubs = utils:split(Bz, Splits),
@@ -100,12 +110,14 @@ start(A,B,Base, Splits) ->
 %%Starts all process's and Returns last process so we can send carry=0 to it.
 distribute([A], [B], Base, Next,Master,Min,Max) ->
     spawn( fun() -> otherProcess(A, B, Base,Next, Master,Min,Max) end);
+
 distribute([A|Ax], [B|Bx], Base, Next,Master,Min,Max) ->
     SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Next, Master,Min,Max) end),
     distribute(Ax,Bx,Base,SpawnedProcess,Master,Min,Max).
 
 distribute([A], [B], Base, Next,Master,Min,Max,spec) ->
     spawn( fun() -> otherProcess(A, B, Base,Next, Master,Min,Max,spec) end);
+
 distribute([A|Ax], [B|Bx], Base, Next,Master,Min,Max, spec) ->
     SpawnedProcess = spawn( fun() -> otherProcess(A, B, Base, Next, Master,Min,Max,spec) end),
     distribute(Ax,Bx,Base,SpawnedProcess,Master,Min,Max,spec).
@@ -117,7 +129,8 @@ otherProcess(A,B,Base, Next, Master,Min,Max) ->
 	    Master ! {sum, Sum,Carries},
 	    Next ! {carry, CarryOut}
     end.
-%%Speculative mode
+
+%%Speculative mode version of otherProcess
 otherProcess(A, B, Base, Next, Master,Min, Max, spec) ->
     Parent = self(),
     CarryChild = spawn(fun() -> speculativeProcess(A, B, Base, 1, Min, Max, Parent) end),
@@ -125,6 +138,7 @@ otherProcess(A, B, Base, Next, Master,Min, Max, spec) ->
     {CarryOut, Sum, Carries} = otherProcessLoop(NoCarryChild, CarryChild, undecided, undecided, undecided),
     Master ! {sum, Sum,Carries},
     Next ! {carry, CarryOut}.
+
 
 %%Stateful loop for figuring out which speculative result to use
 otherProcessLoop(NoCarryChild, CarryChild, CarryIn, CarryResult, NoCarryResult) ->
@@ -153,7 +167,7 @@ otherProcessLoop(NoCarryChild, CarryChild, CarryIn, CarryResult, NoCarryResult) 
 speculativeProcess(A, B, Base, CarryIn, Min, Max, Parent) ->
     Result = addThis(list_to_integer(A),list_to_integer(B),Base,CarryIn,Min,Max),
     Parent ! {spec, CarryIn, Result}.
-    
+
 %%Gathers Sums    
 listener(Sums) ->
     receive
@@ -199,8 +213,8 @@ getCarryOutsAux(A, B, Base, Cin,Min,Max) ->
     {N, Cout} = addDigits(A rem 10, B rem 10, Base, Cin),
     [{N, Cin} | getCarryOutsAux(A div 10, B div 10, Base, Cout,Min,Max)].
 
-%% @doc Adds two digits (0-9) and a carry in.
-%% TODO: Add guards for valid A, B, Base and Cin
+
+%% Adds two digits (0-9) and a carry in.
 -spec addDigits(A, B, Base, Cin) -> {Sum, Cout} when
       A::integer(),
       B::integer(),
@@ -209,15 +223,15 @@ getCarryOutsAux(A, B, Base, Cin,Min,Max) ->
       Sum::integer(),
       Cout::integer().
 
+
 addDigits(A, B, Base, Cin) ->
     Sum = (A + B + Cin) rem Base,
     Cout = (A + B + Cin) div Base,
     {Sum, Cout}.
 
-
 %Returns {COUT, SUM}::{int, int}
-addThis(A,B,Base,CIN,Min,Max) ->
-    {[SumHead|SumT], Carries} = lists:unzip(getCarryOuts(A,B,Base,CIN,Min,Max)),
+addThis(A,B,Base,Cin,Min,Max) ->
+    {[SumHead|SumT], Carries} = lists:unzip(getCarryOuts(A,B,Base,Cin,Min,Max)),
     LongestCount = length(integer_to_list(max(A,B))),
     if
 	length([SumHead|SumT]) > LongestCount ->
